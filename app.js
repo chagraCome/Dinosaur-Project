@@ -7,8 +7,7 @@
         this.where = where;
         this.when = when;
         this.fact = fact;
-        this.favoriteLanguage = 'JavaJSScript';
-    
+        this.NetflixShow = 'AO';
     }
 
     //Create Dino Objects
@@ -17,7 +16,6 @@
         return fetch("dino.json")
         .then((response) => response.json())
         .then((data) => {
-            //console.log(data);
           dinosaursList = data.Dinos.map(
             x =>
               new Dinosaur(
@@ -38,7 +36,6 @@
     window.onload = async function() {
         dinoData = await fetchfile();
     }
-    
   
     // Create Human Object
     function HumanUser(name, feet, inches, weight, diet) {
@@ -47,7 +44,7 @@
             this.inches = inches,
             this.weight = weight,
             this.diet = diet,
-            this.height=(inches * 2.54)+ (feet),
+            this.height= inches+ (feet*12),
             this.species="human beeing"
     }
 
@@ -67,53 +64,54 @@
 
 // Create Dino Compare Method 1
     // NOTE: Weight in JSON file is in lbs, height in inches. 
-    Dinosaur.prototype.weightCompare=(human)=>{ 
-        console.log(this.species);
-       if(this.weight> human.weight){
-            const weightDifference=this.weight-human.weight;
-            return `${this.species} is heavier than ${human.name} with ${weightDifference} Lbs`;
+    const weightCompare=(dinasaur,human)=>{ 
+        const diname=dinasaur.species;
+        const diweight=dinasaur.weight;
+        const huweight=human.weight;
+        const huname=human.name;
+        const weightDifference= diweight-huweight;
+       if( weightDifference > 0){
+            return `${diname} is heavier than ${huname} with ${weightDifference} Lbs`;
         }
-        else if(this.weight< human.weight){
-            const weightDifference=human.weight-this.weight;
-            return `${human.name} is heavier than ${this.species} with ${weightDifference} Lbs`;
+        else if(weightDifference< 0){
+            return `${huname} is heavier than ${diname} with ${Math.abs(weightDifference)} Lbs`;
         }else{
-            return `${human.name} and ${this.species} have the same weight: ${human.weight} Lbs`;
+            return `${huname} and ${diname} have the same weight: ${huweight} Lbs`;
         }
         }
 
         // Create Dino Compare Method 2
         // NOTE: Weight in JSON file is in lbs, height in inches.
-     Dinosaur.prototype.heightCompare=(human)=>{ 
-        console.log(this.species);
-            if(this.height> human.height){
-                const heightDifference=this.height-human.height;
-                return `${this.species} is talller than ${human.name} with ${heightDifference} inches`;
+     const heightCompare=(dinasaur,human)=>{ 
+        const diname=dinasaur.species;
+        const dihight=dinasaur.height;
+        const huhight=human.height;
+        const huname=human.name;
+        const heightDifference=dihight-huhight;
+        const positivedif= Math.abs(heightDifference);
+            if(heightDifference > 0){
+                return `${diname} is talller than ${huname} with ${heightDifference} inches`;
             }
-            else if(this.height< human.height){
+            else if(heightDifference < 0){
                 const heightDifference=human.height-this.height;
-                return `${this.species} is shorter than ${human.name} with ${heightDifference} inches`;
+                return `${diname} is shorter than ${huname} with ${positivedif} inches`;
             }else{
-                return `${human.name} and ${this.species} have the same height: ${human.height} inches`;
+                return `${huname} and ${diname} have the same height: ${huhight} inches`;
             }
-        
         }
     // Create Dino Compare Method 3
     // NOTE: Weight in JSON file is in lbs, height in inches.
-        HumanUser.prototype.dietCompare=(dinasaur)=>{
-            console.log(this.name);
-            if(this.diet!=dinasaur.diet){
-                return `${dinasaur.species} have different diet than ${this.name}`;
+        const dietCompare=(dinasaur,human)=>{
+            if(human.diet!=dinasaur.diet){
+                return `${dinasaur.species} have different diet than ${human.name}`;
             }
             else{
-                return`${dinasaur.species} and ${this.name} have the same diet. Hmmm interessting !`;
+                return`${dinasaur.species} and ${human.name} have the same diet. Hmmm interessting !`;
             }
         }
 
     // Generate Tiles for each Dino in Array
   
-        // Add tiles to DOM
-
-   
         const doAction= (human)=>{
             // Remove form from screen 
             const ourForm =document.getElementById('dino-compare');
@@ -123,47 +121,43 @@
           const dinoFacts=dinoData.map(di=>{
               //choose a rundom number between 0 and 4
               const randumNum=Math.floor(Math.random() * 4);
-              console.log(randumNum);
               if(di.species!="Pigeon"){
               switch(randumNum){
                   case 1:
-                      di.fact=di.weightCompare(human);
+                      di.fact= weightCompare(di,human);
                       break;
                   case 2:
-                      di.fact=di.heightCompare(human);
+                      di.fact= heightCompare(di,human);
                       break;
                   case 3:
-                      di.fact=di.fact;
+                      di.fact= di.fact;
                       break;
                   default:
-                      di.fact=human.dietCompare(di);
+                      di.fact= dietCompare(di,human);
               }
           }
               return di;
           });
           //add human to to the final version of dinosaurs Array
-          console.log(dinoFacts);
           dinoFacts.splice(4, 0, human);
           const ourGrid = document.getElementById("grid");
          for (let i = 0; i < 9; i++) {
               const gridItem = document.createElement('div');
               gridItem.classList.add("grid-item");
               const element = dinoFacts[i];
-    //check if the object is human or no, if yes we will not add fact to this tile
-            console.log(typeof(element));
-              if(element.species=="human beeing"){
-              gridItem.innerHTML = `<h3>${element.name}</h3>
-              <img src="images/human.png" alt="image of human">
-              <p>${element.name}</p>`;
+        //check if the object is human or no, if yes we will not add fact to this tile
+              if(element.species!="human beeing"){
+                gridItem.innerHTML = `<h3>${element.species}</h3>
+                <img src="images/${element.species.toLowerCase()}.png" alt="image of ${element.species}">
+                <p>${element.fact}</p>`;
               }else {
-              gridItem.innerHTML = `<h3>${element.species}</h3>
-              <img src="images/${element.species.toLowerCase()}.png" alt="image of ${element.species}">
-              <p>${element.fact}</p>`;
+                gridItem.innerHTML = `<h3>${element.name}</h3>
+                <img src="images/human.png" alt="image of human">
+                <p>${element.name}</p>`;
+             
           }
           ourGrid.appendChild(gridItem); 
       }  
     }
-
-// On button click, prepare and display infographic
       
       
